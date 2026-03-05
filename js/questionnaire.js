@@ -1,4 +1,4 @@
-import { supabase } from './supabase-client.js';
+import { supabase, SUPABASE_URL, SUPABASE_ANON_KEY } from './supabase-client.js';
 
 // ── Tags input ──────────────────────────────────────────────────────────────
 export function initTagsInput(containerId, inputId, tagsListId) {
@@ -147,6 +147,7 @@ export async function callRecommendFunction(questionnaire) {
     headers: {
       'Content-Type': 'application/json',
       'Authorization': `Bearer ${session.access_token}`,
+      'apikey': SUPABASE_ANON_KEY,
     },
     body: JSON.stringify(questionnaire),
   });
