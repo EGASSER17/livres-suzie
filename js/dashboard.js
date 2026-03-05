@@ -1,6 +1,17 @@
 import { supabase } from './supabase-client.js';
 
 /**
+ * Supprime une recommandation par son ID.
+ */
+export async function deleteRecommendation(id) {
+  const { error } = await supabase
+    .from('recommendations')
+    .delete()
+    .eq('id', id);
+  return { error };
+}
+
+/**
  * Charge les 5 dernières recommandations de l'utilisateur.
  * @param {string} userId
  * @returns {Array}

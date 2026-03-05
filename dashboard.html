@@ -46,36 +46,44 @@
 
 <script type="module">
   import { requireAuth, logout } from './js/auth.js';
-  import { loadHistory, formatDate, summarizeCriteria } from './js/dashboard.js';
+  import { loadHistory, formatDate, summarizeCriteria, deleteRecommendation } from './js/dashboard.js';
 
   const loader  = document.getElementById('loader');
   const navEmail = document.getElementById('nav-email');
   const historyContainer = document.getElementById('history-container');
 
+  function showEmpty() {
+    historyContainer.innerHTML = `
+      <div class="dashboard-empty">
+        <div class="icon">📚</div>
+        <h3>Aucune recommandation pour l'instant</h3>
+        <p>Répondez au questionnaire pour obtenir vos 10 premiers livres personnalisés.</p>
+        <a href="questionnaire.html" class="btn btn-primary btn-lg">
+          Commencer maintenant
+        </a>
+      </div>`;
+  }
+
+  function showToast(msg, type = 'info') {
+    const tc = document.getElementById('toast-container');
+    const t = document.createElement('div');
+    t.className = `toast ${type}`;
+    t.textContent = msg;
+    tc.appendChild(t);
+    setTimeout(() => t.remove(), 4000);
+  }
+
   (async () => {
-    // Guard + init
     const user = await requireAuth();
     if (!user) return;
 
     navEmail.textContent = user.email;
     document.getElementById('btn-logout').addEventListener('click', logout);
 
-    // Charger l'historique
     const history = await loadHistory(user.id);
     loader.classList.add('hidden');
 
-    if (history.length === 0) {
-      historyContainer.innerHTML = `
-        <div class="dashboard-empty">
-          <div class="icon">📚</div>
-          <h3>Aucune recommandation pour l'instant</h3>
-          <p>Répondez au questionnaire pour obtenir vos 5 premiers livres personnalisés.</p>
-          <a href="questionnaire.html" class="btn btn-primary btn-lg">
-            Commencer maintenant
-          </a>
-        </div>`;
-      return;
-    }
+    if (history.length === 0) { showEmpty(); return; }
 
     const grid = document.createElement('div');
     grid.className = 'history-grid';
@@ -86,18 +94,45 @@
       const card = document.createElement('div');
       card.className = 'history-card';
       card.innerHTML = `
+        <button class="history-card-delete" title="Supprimer">×</button>
         <div class="history-card-date">${formatDate(rec.created_at)}</div>
         <div class="history-card-title">
           ${rec.books[0]?.title ?? 'Recommandation'}<br/>
-          <span style="font-family:Lato,sans-serif;font-size:.82rem;opacity:.6">et ${nbBooks - 1} autre${nbBooks > 2 ? 's' : ''}</span>
+          <span style="font-family:DM Sans,sans-serif;font-size:.82rem;opacity:.6">et ${nbBooks - 1} autre${nbBooks > 2 ? 's' : ''}</span>
         </div>
         <div class="history-card-tags">
           ${tags.map(t => `<span class="tag">${t}</span>`).join('')}
         </div>
         <div class="history-card-books">${nbBooks} livre${nbBooks > 1 ? 's' : ''} recommandé${nbBooks > 1 ? 's' : ''}</div>`;
+
+      // Navigation vers les résultats
       card.addEventListener('click', () => {
         window.location.href = `results.html?id=${rec.id}`;
       });
+
+      // Suppression
+      const delBtn = card.querySelector('.history-card-delete');
+      delBtn.addEventListener('click', async (e) => {
+        e.stopPropagation();
+        if (!confirm('Supprimer cette recommandation ?')) return;
+        delBtn.disabled = true;
+        delBtn.textContent = '…';
+        const { error } = await deleteRecommendation(rec.id);
+        if (error) {
+          showToast('Erreur lors de la suppression.', 'error');
+          delBtn.disabled = false;
+          delBtn.textContent = '×';
+        } else {
+          card.style.transition = 'opacity .3s ease, transform .3s ease';
+          card.style.opacity = '0';
+          card.style.transform = 'scale(0.88)';
+          setTimeout(() => {
+            card.remove();
+            if (grid.children.length === 0) showEmpty();
+          }, 300);
+        }
+      });
+
       grid.appendChild(card);
     });
 

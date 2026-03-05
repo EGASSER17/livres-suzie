@@ -2,8 +2,8 @@
 
 /* ── Variables ─────────────────────────────── */
 :root {
-  --forest-green:  #2D5F2D;
-  --olive-green:   #7A8B5C;
+  --forest-green:  #7A5C82;
+  --olive-green:   #A889B0;
   --dusty-rose:    #D4A0A0;
   --mauve:         #B48EAD;
   --butter-yellow: #F5E6A3;
@@ -412,6 +412,20 @@ h2 { font-size: clamp(1.5rem, 3.5vw, 2.2rem); }
 .tag.gold { background: var(--warm-brown); color: var(--butter-yellow); }
 .history-card-books { font-size: .8rem; opacity: .6; margin-top: .6rem; font-style: italic; }
 
+/* Bouton suppression carte */
+.history-card-delete {
+  position: absolute; top: 8px; right: 8px;
+  width: 22px; height: 22px; border-radius: 50%;
+  background: var(--warm-brown); color: var(--cream);
+  border: none; cursor: pointer;
+  font-size: .95rem; line-height: 1;
+  display: flex; align-items: center; justify-content: center;
+  opacity: 0; transition: opacity .2s ease, transform .2s ease;
+  z-index: 3;
+}
+.history-card:hover .history-card-delete { opacity: 1; }
+.history-card-delete:hover { transform: scale(1.2); }
+
 /* ═══════════════════════════════════════════ */
 /* QUESTIONNAIRE                               */
 /* ═══════════════════════════════════════════ */
@@ -651,11 +665,16 @@ h2 { font-size: clamp(1.5rem, 3.5vw, 2.2rem); }
   max-width: 620px;
   animation: cardIn .45s ease backwards;
 }
-.book-card:nth-child(1) { --card-rotation: -1.5deg; align-self: flex-start; margin-left: 1.5rem; }
-.book-card:nth-child(2) { --card-rotation:  2deg;   align-self: flex-end;   margin-right: 1.5rem; background: var(--butter-yellow); animation-delay: .12s; }
-.book-card:nth-child(3) { --card-rotation: -2.5deg; align-self: flex-start; margin-left: 3rem;   animation-delay: .22s; }
-.book-card:nth-child(4) { --card-rotation:  1.5deg; align-self: flex-end;   margin-right: 3rem;  background: var(--dusty-rose); animation-delay: .32s; }
-.book-card:nth-child(5) { --card-rotation: -1deg;   align-self: center;     animation-delay: .42s; }
+.book-card:nth-child(1)  { --card-rotation: -1.5deg; align-self: flex-start; margin-left: 1.5rem; }
+.book-card:nth-child(2)  { --card-rotation:  2deg;   align-self: flex-end;   margin-right: 1.5rem; background: var(--butter-yellow); animation-delay: .10s; }
+.book-card:nth-child(3)  { --card-rotation: -2.5deg; align-self: flex-start; margin-left: 3rem;    animation-delay: .18s; }
+.book-card:nth-child(4)  { --card-rotation:  1.5deg; align-self: flex-end;   margin-right: 3rem;   background: var(--dusty-rose);    animation-delay: .26s; }
+.book-card:nth-child(5)  { --card-rotation: -1deg;   align-self: center;     animation-delay: .34s; }
+.book-card:nth-child(6)  { --card-rotation:  2.5deg; align-self: flex-end;   margin-right: 1.5rem; background: var(--butter-yellow); animation-delay: .42s; }
+.book-card:nth-child(7)  { --card-rotation: -1.8deg; align-self: flex-start; margin-left: 2rem;    animation-delay: .50s; }
+.book-card:nth-child(8)  { --card-rotation:  1.2deg; align-self: flex-end;   margin-right: 2.5rem; background: var(--dusty-rose);    animation-delay: .58s; }
+.book-card:nth-child(9)  { --card-rotation: -2deg;   align-self: flex-start; margin-left: 1rem;    animation-delay: .66s; }
+.book-card:nth-child(10) { --card-rotation:  1.8deg; align-self: center;     background: var(--butter-yellow); animation-delay: .74s; }
 
 @keyframes cardIn {
   from { opacity: 0; transform: rotate(var(--card-rotation,-1deg)) translateY(22px) scale(.97); }

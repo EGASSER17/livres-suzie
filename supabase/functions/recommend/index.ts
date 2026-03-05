@@ -70,7 +70,7 @@ serve(async (req: Request) => {
       ? q.keywords.join(', ')
       : 'aucun mot-clé particulier';
 
-    const prompt = `Tu es un expert libraire francophone. Recommande exactement 5 livres selon ces critères :
+    const prompt = `Tu es un expert libraire francophone. Recommande exactement 10 livres selon ces critères :
 - Genres appréciés : ${q.genres.join(', ')}
 - Format souhaité : ${q.styles.join(', ')}
 - Mots-clés thématiques : ${keywordsText}
@@ -86,7 +86,7 @@ RÈGLES ABSOLUES — lis-les attentivement :
 6. Les livres doivent être disponibles en français (traduits ou écrits en français).
 7. Pour le champ "isbn", donne le vrai ISBN-13 du livre si tu le connais, sinon laisse une chaîne vide "".
 
-Retourne UNIQUEMENT un tableau JSON valide, sans texte avant ni après, sans markdown :
+Retourne UNIQUEMENT un tableau JSON valide de 10 éléments, sans texte avant ni après, sans markdown :
 [{"title":"...","author":"Prénom Nom","year":"AAAA","isbn":"978...","summary":"Résumé en 2-3 phrases.","why":"Pourquoi ce livre correspond exactement à ces critères.","amazon_search":"titre auteur"}]`;
 
     // ── 4. Appel à l'API Claude ────────────────────────────────────────────────
@@ -107,8 +107,8 @@ Retourne UNIQUEMENT un tableau JSON valide, sans texte avant ni après, sans mar
         'anthropic-version': '2023-06-01',
       },
       body: JSON.stringify({
-        model:      'claude-haiku-4-5-20251001',
-        max_tokens: 2048,
+        model:      'claude-sonnet-4-6',
+        max_tokens: 4096,
         messages: [
           { role: 'user', content: prompt }
         ],
@@ -143,7 +143,7 @@ Retourne UNIQUEMENT un tableau JSON valide, sans texte avant ni après, sans mar
     }
 
     // Valider le format minimal
-    books = books.filter(b => b.title && b.author).slice(0, 5);
+    books = books.filter(b => b.title && b.author).slice(0, 10);
 
     return new Response(JSON.stringify({ books }), {
       status:  200,

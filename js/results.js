@@ -58,7 +58,7 @@ export function formatDate(isoString) {
  */
 export function buildBookCard(book, index, coverUrl = null) {
   const amazonUrl = buildAmazonUrl(book.amazon_search || `${book.title} ${book.author}`);
-  const rotations = [-1.5, 2, -2.5, 1.5, -1];
+  const rotations = [-1.5, 2, -2.5, 1.5, -1, 2.5, -1.8, 1.2, -2, 1.8];
   const rotation  = rotations[index] ?? -1;
 
   const coverHtml = coverUrl
