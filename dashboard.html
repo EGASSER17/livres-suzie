@@ -52,64 +52,57 @@
   const navEmail = document.getElementById('nav-email');
   const historyContainer = document.getElementById('history-container');
 
-  function showToast(msg, type = 'info') {
-    const tc = document.getElementById('toast-container');
-    const t = document.createElement('div');
-    t.className = `toast ${type}`;
-    t.textContent = msg;
-    tc.appendChild(t);
-    setTimeout(() => t.remove(), 4000);
-  }
+  (async () => {
+    // Guard + init
+    const user = await requireAuth();
+    if (!user) return;
 
-  // Guard + init
-  const user = await requireAuth();
-  if (!user) throw new Error('Non authentifié');
+    navEmail.textContent = user.email;
+    document.getElementById('btn-logout').addEventListener('click', logout);
 
-  navEmail.textContent = user.email;
-  document.getElementById('btn-logout').addEventListener('click', logout);
+    // Charger l'historique
+    const history = await loadHistory(user.id);
+    loader.classList.add('hidden');
 
-  // Charger l'historique
-  const history = await loadHistory(user.id);
-  loader.classList.add('hidden');
+    if (history.length === 0) {
+      historyContainer.innerHTML = `
+        <div class="dashboard-empty">
+          <div class="icon">📚</div>
+          <h3>Aucune recommandation pour l'instant</h3>
+          <p>Répondez au questionnaire pour obtenir vos 5 premiers livres personnalisés.</p>
+          <a href="questionnaire.html" class="btn btn-primary btn-lg">
+            Commencer maintenant
+          </a>
+        </div>`;
+      return;
+    }
 
-  if (history.length === 0) {
-    historyContainer.innerHTML = `
-      <div class="dashboard-empty">
-        <div class="icon">📚</div>
-        <h3>Aucune recommandation pour l'instant</h3>
-        <p>Répondez au questionnaire pour obtenir vos 5 premiers livres personnalisés.</p>
-        <a href="questionnaire.html" class="btn btn-primary btn-lg">
-          Commencer maintenant
-        </a>
-      </div>`;
-    return;
-  }
+    const grid = document.createElement('div');
+    grid.className = 'history-grid';
 
-  const grid = document.createElement('div');
-  grid.className = 'history-grid';
-
-  history.forEach(rec => {
-    const tags = summarizeCriteria(rec.questionnaire);
-    const nbBooks = rec.books?.length ?? 0;
-    const card = document.createElement('div');
-    card.className = 'history-card';
-    card.innerHTML = `
-      <div class="history-card-date">${formatDate(rec.created_at)}</div>
-      <div class="history-card-title">
-        ${rec.books[0]?.title ?? 'Recommandation'}<br/>
-        <span style="font-family:Lato,sans-serif;font-size:.82rem;opacity:.6">et ${nbBooks - 1} autre${nbBooks > 2 ? 's' : ''}</span>
-      </div>
-      <div class="history-card-tags">
-        ${tags.map(t => `<span class="tag">${t}</span>`).join('')}
-      </div>
-      <div class="history-card-books">${nbBooks} livre${nbBooks > 1 ? 's' : ''} recommandé${nbBooks > 1 ? 's' : ''}</div>`;
-    card.addEventListener('click', () => {
-      window.location.href = `results.html?id=${rec.id}`;
+    history.forEach(rec => {
+      const tags = summarizeCriteria(rec.questionnaire);
+      const nbBooks = rec.books?.length ?? 0;
+      const card = document.createElement('div');
+      card.className = 'history-card';
+      card.innerHTML = `
+        <div class="history-card-date">${formatDate(rec.created_at)}</div>
+        <div class="history-card-title">
+          ${rec.books[0]?.title ?? 'Recommandation'}<br/>
+          <span style="font-family:Lato,sans-serif;font-size:.82rem;opacity:.6">et ${nbBooks - 1} autre${nbBooks > 2 ? 's' : ''}</span>
+        </div>
+        <div class="history-card-tags">
+          ${tags.map(t => `<span class="tag">${t}</span>`).join('')}
+        </div>
+        <div class="history-card-books">${nbBooks} livre${nbBooks > 1 ? 's' : ''} recommandé${nbBooks > 1 ? 's' : ''}</div>`;
+      card.addEventListener('click', () => {
+        window.location.href = `results.html?id=${rec.id}`;
+      });
+      grid.appendChild(card);
     });
-    grid.appendChild(card);
-  });
 
-  historyContainer.appendChild(grid);
+    historyContainer.appendChild(grid);
+  })();
 </script>
 
 </body>
