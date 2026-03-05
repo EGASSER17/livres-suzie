@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>LivresIA — Connexion</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+<div class="auth-page">
+  <div class="auth-hero">
+    <h1>Livres<span>IA</span></h1>
+    <p>Découvrez vos prochains livres favoris grâce à l'intelligence artificielle.</p>
+  </div>
+
+  <div class="auth-card">
+    <div class="auth-tabs">
+      <button class="auth-tab active" data-tab="login">Se connecter</button>
+      <button class="auth-tab" data-tab="register">Créer un compte</button>
+    </div>
+
+    <!-- Connexion -->
+    <div class="auth-panel active" id="panel-login">
+      <form id="form-login" novalidate>
+        <div class="form-group">
+          <label class="form-label" for="login-email">Email</label>
+          <input class="form-input" type="email" id="login-email"
+                 placeholder="vous@exemple.com" required autocomplete="email" />
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="login-password">Mot de passe</label>
+          <input class="form-input" type="password" id="login-password"
+                 placeholder="••••••••" required autocomplete="current-password" />
+        </div>
+        <div class="form-error" id="login-error"></div>
+        <button type="submit" class="btn btn-primary" style="width:100%; margin-top:.5rem" id="btn-login">
+          Se connecter
+        </button>
+      </form>
+    </div>
+
+    <!-- Inscription -->
+    <div class="auth-panel" id="panel-register">
+      <form id="form-register" novalidate>
+        <div class="form-group">
+          <label class="form-label" for="reg-email">Email</label>
+          <input class="form-input" type="email" id="reg-email"
+                 placeholder="vous@exemple.com" required autocomplete="email" />
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="reg-password">Mot de passe</label>
+          <input class="form-input" type="password" id="reg-password"
+                 placeholder="8 caractères minimum" required autocomplete="new-password" />
+          <div class="form-hint">Minimum 8 caractères</div>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="reg-password2">Confirmer le mot de passe</label>
+          <input class="form-input" type="password" id="reg-password2"
+                 placeholder="••••••••" required autocomplete="new-password" />
+        </div>
+        <div class="form-error" id="register-error"></div>
+        <button type="submit" class="btn btn-primary" style="width:100%; margin-top:.5rem" id="btn-register">
+          Créer mon compte
+        </button>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- Toast container -->
+<div class="toast-container" id="toast-container"></div>
+
+<script type="module">
+  import { login, register, redirectIfAuthenticated } from './js/auth.js';
+
+  // Rediriger si déjà connecté
+  await redirectIfAuthenticated();
+
+  // ── Helpers ────────────────────────────────
+  function showToast(msg, type = 'info') {
+    const tc = document.getElementById('toast-container');
+    const t = document.createElement('div');
+    t.className = `toast ${type}`;
+    t.textContent = msg;
+    tc.appendChild(t);
+    setTimeout(() => t.remove(), 4000);
+  }
+
+  function setError(id, msg) {
+    document.getElementById(id).textContent = msg;
+  }
+
+  function setLoading(btn, loading) {
+    btn.disabled = loading;
+    btn.textContent = loading ? 'Chargement…' : btn.dataset.label;
+  }
+
+  // Sauvegarder les labels originaux
+  document.getElementById('btn-login').dataset.label = 'Se connecter';
+  document.getElementById('btn-register').dataset.label = 'Créer mon compte';
+
+  // ── Tabs ───────────────────────────────────
+  document.querySelectorAll('.auth-tab').forEach(tab => {
+    tab.addEventListener('click', () => {
+      document.querySelectorAll('.auth-tab, .auth-panel').forEach(el => el.classList.remove('active'));
+      tab.classList.add('active');
+      document.getElementById(`panel-${tab.dataset.tab}`).classList.add('active');
+      setError('login-error', '');
+      setError('register-error', '');
+    });
+  });
+
+  // ── Login ──────────────────────────────────
+  document.getElementById('form-login').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    setError('login-error', '');
+    const email    = document.getElementById('login-email').value.trim();
+    const password = document.getElementById('login-password').value;
+    const btn      = document.getElementById('btn-login');
+
+    if (!email || !password) {
+      return setError('login-error', 'Veuillez remplir tous les champs.');
+    }
+
+    setLoading(btn, true);
+    const { error } = await login(email, password);
+    setLoading(btn, false);
+
+    if (error) {
+      setError('login-error', 'Email ou mot de passe incorrect.');
+    } else {
+      showToast('Connexion réussie !', 'success');
+      setTimeout(() => { window.location.href = 'dashboard.html'; }, 500);
+    }
+  });
+
+  // ── Register ───────────────────────────────
+  document.getElementById('form-register').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    setError('register-error', '');
+    const email     = document.getElementById('reg-email').value.trim();
+    const password  = document.getElementById('reg-password').value;
+    const password2 = document.getElementById('reg-password2').value;
+    const btn       = document.getElementById('btn-register');
+
+    if (!email || !password || !password2) {
+      return setError('register-error', 'Veuillez remplir tous les champs.');
+    }
+    if (password.length < 8) {
+      return setError('register-error', 'Le mot de passe doit faire au moins 8 caractères.');
+    }
+    if (password !== password2) {
+      return setError('register-error', 'Les mots de passe ne correspondent pas.');
+    }
+
+    setLoading(btn, true);
+    const { error } = await register(email, password);
+    setLoading(btn, false);
+
+    if (error) {
+      if (error.message.includes('already registered')) {
+        setError('register-error', 'Cet email est déjà utilisé.');
+      } else {
+        setError('register-error', error.message);
+      }
+    } else {
+      showToast('Compte créé ! Vérifiez votre email pour confirmer.', 'success');
+      // Tentative de connexion directe (si email confirm désactivé)
+      setTimeout(() => { window.location.href = 'dashboard.html'; }, 1200);
+    }
+  });
+</script>
+
+</body>
+</html>

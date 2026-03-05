@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>LivresIA — Recommandations</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+<nav class="navbar">
+  <a href="dashboard.html" class="navbar-brand">LivresIA</a>
+  <div class="navbar-right">
+    <a href="dashboard.html" class="btn btn-outline btn-sm">Tableau de bord</a>
+  </div>
+</nav>
+
+<!-- Loader -->
+<div class="loader-overlay" id="loader">
+  <div class="spinner"></div>
+  <p>Chargement de vos livres…</p>
+</div>
+
+<div class="page-container" id="main-content" style="display:none">
+
+  <div class="results-header">
+    <h1>Vos 5 recommandations</h1>
+    <p id="results-date" style="opacity:.55;font-size:.9rem"></p>
+  </div>
+
+  <!-- Critères utilisés -->
+  <div id="criteria-summary" style="display:flex;flex-wrap:wrap;gap:.4rem;justify-content:center;margin-bottom:2rem"></div>
+
+  <hr class="divider" />
+
+  <!-- Livres -->
+  <div class="books-grid" id="books-grid">
+    <!-- Rempli par JS -->
+  </div>
+
+  <!-- Actions -->
+  <div class="results-actions">
+    <a href="questionnaire.html" class="btn btn-primary btn-lg">
+      Nouvelle recherche
+    </a>
+    <a href="dashboard.html" class="btn btn-ghost btn-lg">
+      Retour au tableau de bord
+    </a>
+  </div>
+</div>
+
+<!-- Toast container -->
+<div class="toast-container" id="toast-container"></div>
+
+<script type="module">
+  import { requireAuth } from './js/auth.js';
+  import { loadRecommendation, formatDate, buildBookCard } from './js/results.js';
+
+  function showToast(msg, type = 'info') {
+    const tc = document.getElementById('toast-container');
+    const t = document.createElement('div');
+    t.className = `toast ${type}`;
+    t.textContent = msg;
+    tc.appendChild(t);
+    setTimeout(() => t.remove(), 5000);
+  }
+
+  // Guard auth
+  await requireAuth();
+
+  // Récupérer l'ID depuis l'URL
+  const params = new URLSearchParams(window.location.search);
+  const recId  = params.get('id');
+
+  if (!recId) {
+    window.location.href = 'dashboard.html';
+    throw new Error('Pas d\'ID');
+  }
+
+  try {
+    const rec = await loadRecommendation(recId);
+
+    // Afficher la date
+    document.getElementById('results-date').textContent =
+      'Générées le ' + formatDate(rec.created_at);
+
+    // Afficher les critères
+    const criteriaEl = document.getElementById('criteria-summary');
+    const q = rec.questionnaire;
+    const allCriteria = [
+      ...(q.genres  || []),
+      ...(q.styles  || []),
+      ...(q.keywords || []),
+      q.age,
+      q.level,
+    ].filter(Boolean);
+
+    allCriteria.forEach(c => {
+      const span = document.createElement('span');
+      span.className = 'tag gold';
+      span.textContent = c;
+      criteriaEl.appendChild(span);
+    });
+
+    // Afficher les livres
+    const grid = document.getElementById('books-grid');
+    rec.books.forEach((book, i) => {
+      grid.innerHTML += buildBookCard(book, i);
+    });
+
+    document.getElementById('loader').classList.add('hidden');
+    document.getElementById('main-content').style.display = 'block';
+
+  } catch (err) {
+    console.error(err);
+    document.getElementById('loader').classList.add('hidden');
+    showToast('Impossible de charger les recommandations.', 'error');
+    setTimeout(() => { window.location.href = 'dashboard.html'; }, 2500);
+  }
+</script>
+
+</body>
+</html>

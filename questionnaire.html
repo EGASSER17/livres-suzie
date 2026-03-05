@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>LivresIA — Questionnaire</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+<nav class="navbar">
+  <a href="dashboard.html" class="navbar-brand">LivresIA</a>
+  <div class="navbar-right">
+    <a href="dashboard.html" class="btn btn-outline btn-sm">Tableau de bord</a>
+  </div>
+</nav>
+
+<!-- Loader (affiché pendant l'appel IA) -->
+<div class="loader-overlay hidden" id="loader">
+  <div class="spinner"></div>
+  <p>L'IA choisit vos livres…</p>
+</div>
+
+<div class="page-container questionnaire-page">
+
+  <div style="margin-bottom:1.5rem">
+    <h1 class="section-title">Trouvez votre prochain livre</h1>
+    <p class="section-subtitle">Répondez à 4 questions pour obtenir des recommandations personnalisées.</p>
+  </div>
+
+  <!-- Progress bar -->
+  <div class="progress-bar-container">
+    <div class="progress-steps">
+      <div class="progress-steps-fill" id="progress-fill" style="width:0%"></div>
+      <div class="step-dot active" title="Genres">1</div>
+      <div class="step-dot" title="Style">2</div>
+      <div class="step-dot" title="Mots-clés">3</div>
+      <div class="step-dot" title="Profil">4</div>
+    </div>
+    <div class="progress-label" id="progress-label">Étape 1 sur 4</div>
+  </div>
+
+  <!-- ── Étape 1 : Genres ───────────────────── -->
+  <div class="question-step active" id="step-1">
+    <div class="step-header">
+      <h2>Quels genres aimez-vous ?</h2>
+      <p>Sélectionnez un ou plusieurs genres qui vous attirent.</p>
+    </div>
+
+    <div class="checkbox-grid">
+      <div class="checkbox-item"><input type="checkbox" id="g-aventure" name="genre" value="Aventure"><label for="g-aventure">Aventure</label></div>
+      <div class="checkbox-item"><input type="checkbox" id="g-policier" name="genre" value="Policier"><label for="g-policier">Policier</label></div>
+      <div class="checkbox-item"><input type="checkbox" id="g-romance" name="genre" value="Romance"><label for="g-romance">Romance</label></div>
+      <div class="checkbox-item"><input type="checkbox" id="g-humour" name="genre" value="Humour"><label for="g-humour">Humour</label></div>
+      <div class="checkbox-item"><input type="checkbox" id="g-frisson" name="genre" value="Frisson"><label for="g-frisson">Frisson</label></div>
+      <div class="checkbox-item"><input type="checkbox" id="g-fantastique" name="genre" value="Fantastique"><label for="g-fantastique">Fantastique</label></div>
+      <div class="checkbox-item"><input type="checkbox" id="g-sf" name="genre" value="Science-Fiction"><label for="g-sf">Science-Fiction</label></div>
+      <div class="checkbox-item"><input type="checkbox" id="g-dystopie" name="genre" value="Dystopie"><label for="g-dystopie">Dystopie</label></div>
+      <div class="checkbox-item"><input type="checkbox" id="g-histoire" name="genre" value="Histoire"><label for="g-histoire">Histoire</label></div>
+      <div class="checkbox-item"><input type="checkbox" id="g-biographie" name="genre" value="Biographie"><label for="g-biographie">Biographie</label></div>
+      <div class="checkbox-item"><input type="checkbox" id="g-devperso" name="genre" value="Développement personnel"><label for="g-devperso">Développement perso.</label></div>
+    </div>
+
+    <div class="step-nav">
+      <div></div>
+      <button class="btn btn-primary btn-lg" id="next-1">Suivant →</button>
+    </div>
+  </div>
+
+  <!-- ── Étape 2 : Style ────────────────────── -->
+  <div class="question-step" id="step-2">
+    <div class="step-header">
+      <h2>Quel format vous correspond ?</h2>
+      <p>Sélectionnez un ou plusieurs styles de lecture.</p>
+    </div>
+
+    <div class="checkbox-grid">
+      <div class="checkbox-item"><input type="checkbox" id="s-roman" name="style" value="Roman"><label for="s-roman">Roman</label></div>
+      <div class="checkbox-item"><input type="checkbox" id="s-bd" name="style" value="BD"><label for="s-bd">BD</label></div>
+      <div class="checkbox-item"><input type="checkbox" id="s-manga" name="style" value="Manga"><label for="s-manga">Manga</label></div>
+      <div class="checkbox-item"><input type="checkbox" id="s-album" name="style" value="Album illustré"><label for="s-album">Album illustré</label></div>
+      <div class="checkbox-item"><input type="checkbox" id="s-conte" name="style" value="Conte"><label for="s-conte">Conte</label></div>
+      <div class="checkbox-item"><input type="checkbox" id="s-essai" name="style" value="Essai"><label for="s-essai">Essai</label></div>
+      <div class="checkbox-item"><input type="checkbox" id="s-docu" name="style" value="Documentaire"><label for="s-docu">Documentaire</label></div>
+      <div class="checkbox-item"><input type="checkbox" id="s-nouvelle" name="style" value="Nouvelle"><label for="s-nouvelle">Nouvelle</label></div>
+    </div>
+
+    <div class="step-nav">
+      <button class="btn btn-ghost btn-lg" id="prev-2">← Retour</button>
+      <button class="btn btn-primary btn-lg" id="next-2">Suivant →</button>
+    </div>
+  </div>
+
+  <!-- ── Étape 3 : Mots-clés ────────────────── -->
+  <div class="question-step" id="step-3">
+    <div class="step-header">
+      <h2>Vos mots-clés</h2>
+      <p>Donnez des thèmes, lieux ou sujets qui vous parlent.</p>
+    </div>
+
+    <div class="tags-input-container" id="tags-container">
+      <div class="tags-list" id="tags-list">
+        <input type="text" class="tags-text-input" id="tags-input"
+               placeholder="Ex: Paris, chats, WW2, espace…" maxlength="30" />
+      </div>
+    </div>
+    <p class="tags-hint">Appuyez sur Entrée ou virgule pour valider chaque mot-clé. Optionnel.</p>
+
+    <div class="step-nav">
+      <button class="btn btn-ghost btn-lg" id="prev-3">← Retour</button>
+      <button class="btn btn-primary btn-lg" id="next-3">Suivant →</button>
+    </div>
+  </div>
+
+  <!-- ── Étape 4 : Profil ───────────────────── -->
+  <div class="question-step" id="step-4">
+    <div class="step-header">
+      <h2>Votre profil de lecteur</h2>
+      <p>Pour affiner les recommandations selon votre niveau et votre âge.</p>
+    </div>
+
+    <div class="profile-grid">
+      <div class="profile-section">
+        <label>Tranche d'âge</label>
+        <div class="radio-group">
+          <div class="radio-item">
+            <input type="radio" id="age-enfant" name="age" value="Enfant (6-10 ans)">
+            <label for="age-enfant">Enfant <span class="radio-desc">6–10 ans</span></label>
+          </div>
+          <div class="radio-item">
+            <input type="radio" id="age-preado" name="age" value="Préado (10-13 ans)">
+            <label for="age-preado">Préado <span class="radio-desc">10–13 ans</span></label>
+          </div>
+          <div class="radio-item">
+            <input type="radio" id="age-ado" name="age" value="Ado (13-17 ans)">
+            <label for="age-ado">Ado <span class="radio-desc">13–17 ans</span></label>
+          </div>
+          <div class="radio-item">
+            <input type="radio" id="age-adulte" name="age" value="Adulte (18+)">
+            <label for="age-adulte">Adulte <span class="radio-desc">18+</span></label>
+          </div>
+        </div>
+      </div>
+
+      <div class="profile-section">
+        <label>Niveau de lecture</label>
+        <div class="radio-group">
+          <div class="radio-item">
+            <input type="radio" id="lvl-debutant" name="level" value="Débutant">
+            <label for="lvl-debutant">Débutant <span class="radio-desc">Courts, simples</span></label>
+          </div>
+          <div class="radio-item">
+            <input type="radio" id="lvl-inter" name="level" value="Intermédiaire">
+            <label for="lvl-inter">Intermédiaire <span class="radio-desc">Accessible</span></label>
+          </div>
+          <div class="radio-item">
+            <input type="radio" id="lvl-avance" name="level" value="Avancé">
+            <label for="lvl-avance">Avancé <span class="radio-desc">Riche, complexe</span></label>
+          </div>
+          <div class="radio-item">
+            <input type="radio" id="lvl-expert" name="level" value="Expert">
+            <label for="lvl-expert">Expert <span class="radio-desc">Littérature exigeante</span></label>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="step-nav">
+      <button class="btn btn-ghost btn-lg" id="prev-4">← Retour</button>
+      <button class="btn btn-primary btn-lg" id="btn-submit">
+        Obtenir mes recommandations
+      </button>
+    </div>
+  </div>
+
+</div>
+
+<!-- Toast container -->
+<div class="toast-container" id="toast-container"></div>
+
+<script type="module">
+  import { requireAuth } from './js/auth.js';
+  import {
+    initTagsInput,
+    updateProgress,
+    validateStep,
+    collectFormData,
+    callRecommendFunction,
+    saveRecommendation,
+  } from './js/questionnaire.js';
+
+  const loader = document.getElementById('loader');
+  const TOTAL  = 4;
+  let currentStep = 1;
+
+  function showToast(msg, type = 'info') {
+    const tc = document.getElementById('toast-container');
+    const t = document.createElement('div');
+    t.className = `toast ${type}`;
+    t.textContent = msg;
+    tc.appendChild(t);
+    setTimeout(() => t.remove(), 5000);
+  }
+
+  function goToStep(step) {
+    document.getElementById(`step-${currentStep}`)?.classList.remove('active');
+    currentStep = step;
+    document.getElementById(`step-${currentStep}`)?.classList.add('active');
+    updateProgress(currentStep, TOTAL);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  // Guard auth
+  const user = await requireAuth();
+  if (!user) throw new Error('Non authentifié');
+
+  // Init tags input
+  const tagsCtrl = initTagsInput('tags-container', 'tags-input', 'tags-list');
+
+  // Init progress
+  updateProgress(1, TOTAL);
+
+  // Navigation
+  document.getElementById('next-1').addEventListener('click', () => {
+    if (validateStep(1)) goToStep(2);
+  });
+  document.getElementById('prev-2').addEventListener('click', () => goToStep(1));
+  document.getElementById('next-2').addEventListener('click', () => {
+    if (validateStep(2)) goToStep(3);
+  });
+  document.getElementById('prev-3').addEventListener('click', () => goToStep(2));
+  document.getElementById('next-3').addEventListener('click', () => goToStep(4));
+  document.getElementById('prev-4').addEventListener('click', () => goToStep(3));
+
+  // Soumission finale
+  document.getElementById('btn-submit').addEventListener('click', async () => {
+    if (!validateStep(4)) return;
+
+    const questionnaire = collectFormData(tagsCtrl.getTags);
+
+    loader.classList.remove('hidden');
+    document.getElementById('btn-submit').disabled = true;
+
+    try {
+      const result = await callRecommendFunction(questionnaire);
+      const books = result.books || result;
+      const recId = await saveRecommendation(user.id, questionnaire, books);
+      window.location.href = `results.html?id=${recId}`;
+    } catch (err) {
+      loader.classList.add('hidden');
+      document.getElementById('btn-submit').disabled = false;
+      console.error(err);
+      showToast('Une erreur est survenue. Veuillez réessayer.', 'error');
+    }
+  });
+</script>
+
+</body>
+</html>

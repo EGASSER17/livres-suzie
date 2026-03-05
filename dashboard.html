@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>LivresIA — Tableau de bord</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+<nav class="navbar">
+  <a href="dashboard.html" class="navbar-brand">LivresIA</a>
+  <div class="navbar-right">
+    <span class="navbar-user" id="nav-email"></span>
+    <button class="btn btn-outline btn-sm" id="btn-logout">Déconnexion</button>
+  </div>
+</nav>
+
+<!-- Loader -->
+<div class="loader-overlay" id="loader">
+  <div class="spinner"></div>
+  <p>Chargement…</p>
+</div>
+
+<div class="page-container">
+  <div class="dashboard-header">
+    <div>
+      <h1 class="section-title">Mes recommandations</h1>
+      <p class="section-subtitle">Retrouvez vos sélections passées ou lancez une nouvelle recherche.</p>
+    </div>
+    <a href="questionnaire.html" class="btn btn-primary btn-lg">
+      Nouvelle recommandation
+    </a>
+  </div>
+
+  <hr class="divider" />
+
+  <!-- Historique -->
+  <div id="history-container">
+    <!-- Rempli par JS -->
+  </div>
+</div>
+
+<!-- Toast container -->
+<div class="toast-container" id="toast-container"></div>
+
+<script type="module">
+  import { requireAuth, logout } from './js/auth.js';
+  import { loadHistory, formatDate, summarizeCriteria } from './js/dashboard.js';
+
+  const loader  = document.getElementById('loader');
+  const navEmail = document.getElementById('nav-email');
+  const historyContainer = document.getElementById('history-container');
+
+  function showToast(msg, type = 'info') {
+    const tc = document.getElementById('toast-container');
+    const t = document.createElement('div');
+    t.className = `toast ${type}`;
+    t.textContent = msg;
+    tc.appendChild(t);
+    setTimeout(() => t.remove(), 4000);
+  }
+
+  // Guard + init
+  const user = await requireAuth();
+  if (!user) throw new Error('Non authentifié');
+
+  navEmail.textContent = user.email;
+  document.getElementById('btn-logout').addEventListener('click', logout);
+
+  // Charger l'historique
+  const history = await loadHistory(user.id);
+  loader.classList.add('hidden');
+
+  if (history.length === 0) {
+    historyContainer.innerHTML = `
+      <div class="dashboard-empty">
+        <div class="icon">📚</div>
+        <h3>Aucune recommandation pour l'instant</h3>
+        <p>Répondez au questionnaire pour obtenir vos 5 premiers livres personnalisés.</p>
+        <a href="questionnaire.html" class="btn btn-primary btn-lg">
+          Commencer maintenant
+        </a>
+      </div>`;
+    return;
+  }
+
+  const grid = document.createElement('div');
+  grid.className = 'history-grid';
+
+  history.forEach(rec => {
+    const tags = summarizeCriteria(rec.questionnaire);
+    const nbBooks = rec.books?.length ?? 0;
+    const card = document.createElement('div');
+    card.className = 'history-card';
+    card.innerHTML = `
+      <div class="history-card-date">${formatDate(rec.created_at)}</div>
+      <div class="history-card-title">
+        ${rec.books[0]?.title ?? 'Recommandation'}<br/>
+        <span style="font-family:Lato,sans-serif;font-size:.82rem;opacity:.6">et ${nbBooks - 1} autre${nbBooks > 2 ? 's' : ''}</span>
+      </div>
+      <div class="history-card-tags">
+        ${tags.map(t => `<span class="tag">${t}</span>`).join('')}
+      </div>
+      <div class="history-card-books">${nbBooks} livre${nbBooks > 1 ? 's' : ''} recommandé${nbBooks > 1 ? 's' : ''}</div>`;
+    card.addEventListener('click', () => {
+      window.location.href = `results.html?id=${rec.id}`;
+    });
+    grid.appendChild(card);
+  });
+
+  historyContainer.appendChild(grid);
+</script>
+
+</body>
+</html>
