@@ -38,23 +38,23 @@ export function formatDate(isoString) {
  */
 export function buildBookCard(book, index) {
   const amazonUrl = buildAmazonUrl(book.amazon_search || `${book.title} ${book.author}`);
+  const rotations = [-1.5, 2, -2.5, 1.5, -1];
+  const rotation  = rotations[index] ?? -1;
   return `
-    <article class="book-card">
-      <div class="book-card-number">${index + 1}</div>
-      <div class="book-card-body">
-        <div class="book-title">${escHtml(book.title)}</div>
-        <div class="book-author">${escHtml(book.author)}</div>
-        <div class="book-year">${escHtml(String(book.year))}</div>
-        <div class="book-summary">${escHtml(book.summary)}</div>
-        <div class="book-why"><strong>Pourquoi ce livre ?</strong> ${escHtml(book.why)}</div>
-        <div class="book-card-footer">
-          <a href="${amazonUrl}"
-             target="_blank"
-             rel="noopener noreferrer"
-             class="btn btn-primary btn-sm">
-            Voir sur Amazon.fr
-          </a>
-        </div>
+    <article class="book-card" style="--card-rotation: ${rotation}deg">
+      <span class="book-sticker">${index + 1}</span>
+      <div class="book-title">${escHtml(book.title)}</div>
+      <div class="book-author">${escHtml(book.author)}</div>
+      <div class="book-year">${escHtml(String(book.year))}</div>
+      <div class="book-summary">${escHtml(book.summary)}</div>
+      <div class="book-why">
+        <strong>Pourquoi ce livre ?</strong>
+        ${escHtml(book.why)}
+      </div>
+      <div class="book-card-footer">
+        <a href="${amazonUrl}" target="_blank" rel="noopener noreferrer" class="btn btn-primary btn-sm">
+          Voir sur Amazon.fr
+        </a>
       </div>
     </article>`;
 }
