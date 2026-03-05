@@ -697,6 +697,42 @@ h2 { font-size: clamp(1.5rem, 3.5vw, 2.2rem); }
 }
 .book-card:hover .book-sticker { transform: rotate(20deg) scale(1.12); }
 
+/* Card inner layout */
+.book-card-inner {
+  display: flex;
+  gap: 1.2rem;
+  align-items: flex-start;
+}
+.book-cover-wrap {
+  flex-shrink: 0;
+  transform: rotate(2deg);
+  transition: transform .32s ease;
+}
+.book-card:hover .book-cover-wrap { transform: rotate(-1deg); }
+
+.book-cover {
+  width: 85px;
+  height: 125px;
+  object-fit: cover;
+  border-radius: 2px;
+  box-shadow: 3px 4px 10px rgba(0,0,0,.25);
+  display: block;
+}
+.book-cover--placeholder {
+  width: 85px;
+  height: 125px;
+  background: var(--lined-paper);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Fredericka the Great', serif;
+  font-size: 2.2rem;
+  color: var(--olive-green);
+  border-radius: 2px;
+  box-shadow: 3px 4px 10px rgba(0,0,0,.15);
+}
+.book-content { flex: 1; min-width: 0; }
+
 .book-title {
   font-family: 'Playfair Display', serif; font-style: italic;
   font-size: 1.3rem; margin-bottom: .15rem;

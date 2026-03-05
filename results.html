@@ -54,7 +54,7 @@
 
 <script type="module">
   import { requireAuth } from './js/auth.js';
-  import { loadRecommendation, formatDate, buildBookCard } from './js/results.js';
+  import { loadRecommendation, formatDate, buildBookCard, fetchCoverUrl } from './js/results.js';
 
   function showToast(msg, type = 'info') {
     const tc = document.getElementById('toast-container');
@@ -102,10 +102,15 @@
       criteriaEl.appendChild(span);
     });
 
-    // Afficher les livres
+    // Récupérer les pochettes en parallèle
+    const covers = await Promise.all(
+      rec.books.map(book => fetchCoverUrl(book.title, book.author))
+    );
+
+    // Afficher les livres avec leurs pochettes
     const grid = document.getElementById('books-grid');
     rec.books.forEach((book, i) => {
-      grid.innerHTML += buildBookCard(book, i);
+      grid.innerHTML += buildBookCard(book, i, covers[i]);
     });
 
     document.getElementById('loader').classList.add('hidden');
