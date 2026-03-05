@@ -701,6 +701,32 @@ h2 { font-size: clamp(1.5rem, 3.5vw, 2.2rem); }
   opacity: .55;
 }
 
+/* Bouton cœur favori */
+.book-heart {
+  position: absolute;
+  top: 14px; left: 16px;
+  width: 36px; height: 36px;
+  border-radius: 50%;
+  background: var(--paper-white);
+  border: 2px solid var(--lined-paper);
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1rem;
+  transition: transform .25s ease, background .25s ease, border-color .25s ease;
+  z-index: 3;
+  box-shadow: 1px 2px 5px rgba(0,0,0,.12);
+  line-height: 1;
+}
+.book-heart:hover {
+  transform: scale(1.18);
+  border-color: var(--dusty-rose);
+}
+.book-heart.active {
+  background: var(--dusty-rose);
+  border-color: var(--dusty-rose);
+}
+.book-heart.loading { opacity: .5; cursor: wait; }
+
 /* Sticker numéro */
 .book-sticker {
   position: absolute; top: -18px; right: 18px;

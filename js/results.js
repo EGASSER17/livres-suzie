@@ -56,7 +56,7 @@ export function formatDate(isoString) {
 /**
  * Génère le HTML d'une card de livre.
  */
-export function buildBookCard(book, index, coverUrl = null) {
+export function buildBookCard(book, index, coverUrl = null, favId = '') {
   const amazonUrl = buildAmazonUrl(book.amazon_search || `${book.title} ${book.author}`);
   const rotations = [-1.5, 2, -2.5, 1.5, -1, 2.5, -1.8, 1.2, -2, 1.8];
   const rotation  = rotations[index] ?? -1;
@@ -65,8 +65,19 @@ export function buildBookCard(book, index, coverUrl = null) {
     ? `<img class="book-cover" src="${coverUrl}" alt="Couverture de ${escHtml(book.title)}" loading="lazy" />`
     : `<div class="book-cover book-cover--placeholder">${escHtml(book.title[0] ?? '?')}</div>`;
 
+  const heartClass = favId ? 'book-heart active' : 'book-heart';
+  const heartIcon  = favId ? '❤️' : '🤍';
+
   return `
-    <article class="book-card" style="--card-rotation: ${rotation}deg">
+    <article class="book-card" style="--card-rotation: ${rotation}deg"
+             data-title="${escHtml(book.title)}" data-author="${escHtml(book.author)}">
+      <button class="${heartClass}"
+              data-title="${escHtml(book.title)}"
+              data-author="${escHtml(book.author)}"
+              data-fav-id="${escHtml(favId)}"
+              title="${favId ? 'Retirer des favoris' : 'Ajouter aux favoris'}">
+        ${heartIcon}
+      </button>
       <span class="book-sticker">${index + 1}</span>
       <div class="book-card-inner">
         <div class="book-cover-wrap">${coverHtml}</div>

@@ -11,6 +11,7 @@
 <nav class="navbar">
   <a href="dashboard.html" class="navbar-brand">LivresIA</a>
   <div class="navbar-right">
+    <a href="favorites.html" class="btn btn-outline btn-sm">❤️ Favoris</a>
     <a href="dashboard.html" class="btn btn-outline btn-sm">Tableau de bord</a>
   </div>
 </nav>
@@ -55,6 +56,7 @@
 <script type="module">
   import { requireAuth } from './js/auth.js';
   import { loadRecommendation, formatDate, buildBookCard, fetchCoverUrl } from './js/results.js';
+  import { loadFavorites, addFavorite, removeFavorite, buildFavMap } from './js/favorites.js';
 
   function showToast(msg, type = 'info') {
     const tc = document.getElementById('toast-container');
@@ -66,7 +68,8 @@
   }
 
   // Guard auth
-  await requireAuth();
+  const user = await requireAuth();
+  if (!user) throw new Error('Non authentifié');
 
   // Récupérer l'ID depuis l'URL
   const params = new URLSearchParams(window.location.search);
@@ -102,15 +105,49 @@
       criteriaEl.appendChild(span);
     });
 
-    // Récupérer les pochettes en parallèle
-    const covers = await Promise.all(
-      rec.books.map(book => fetchCoverUrl(book.title, book.author))
-    );
+    // Récupérer pochettes et favoris en parallèle
+    const [covers, existingFavs] = await Promise.all([
+      Promise.all(rec.books.map(book => fetchCoverUrl(book.title, book.author))),
+      loadFavorites(user.id),
+    ]);
+    const favMap = buildFavMap(existingFavs);
 
-    // Afficher les livres avec leurs pochettes
+    // Afficher les livres
     const grid = document.getElementById('books-grid');
     rec.books.forEach((book, i) => {
-      grid.innerHTML += buildBookCard(book, i, covers[i]);
+      const favId = favMap[`${book.title}||${book.author}`] || '';
+      grid.innerHTML += buildBookCard(book, i, covers[i], favId);
+    });
+
+    // Attacher les événements cœur
+    grid.querySelectorAll('.book-heart').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        if (btn.classList.contains('loading')) return;
+        btn.classList.add('loading');
+        const title  = btn.dataset.title;
+        const author = btn.dataset.author;
+        const favId  = btn.dataset.favId;
+        try {
+          if (favId) {
+            await removeFavorite(favId);
+            btn.classList.remove('active');
+            btn.textContent = '🤍';
+            btn.dataset.favId = '';
+            btn.title = 'Ajouter aux favoris';
+          } else {
+            const book = rec.books.find(b => b.title === title && b.author === author);
+            const newId = await addFavorite(user.id, book, rec.id);
+            btn.classList.add('active');
+            btn.textContent = '❤️';
+            btn.dataset.favId = newId;
+            btn.title = 'Retirer des favoris';
+          }
+        } catch (e) {
+          showToast('Erreur, réessayez.', 'error');
+        } finally {
+          btn.classList.remove('loading');
+        }
+      });
     });
 
     document.getElementById('loader').classList.add('hidden');

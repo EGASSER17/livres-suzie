@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>LivresIA — Mes favoris</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+<nav class="navbar">
+  <a href="dashboard.html" class="navbar-brand">LivresIA</a>
+  <div class="navbar-right">
+    <a href="dashboard.html" class="btn btn-outline btn-sm">Tableau de bord</a>
+    <button class="btn btn-outline btn-sm" id="btn-logout">Déconnexion</button>
+  </div>
+</nav>
+
+<!-- Loader -->
+<div class="loader-overlay" id="loader">
+  <div class="spinner"></div>
+  <p>Chargement de vos favoris…</p>
+</div>
+
+<div class="page-container" id="main-content" style="display:none">
+
+  <div class="results-header">
+    <h1>Mes favoris</h1>
+    <p id="favs-count"></p>
+  </div>
+
+  <hr class="divider" />
+
+  <div class="books-grid" id="favs-grid"></div>
+
+  <div class="results-actions" style="margin-top:2rem">
+    <a href="questionnaire.html" class="btn btn-primary btn-lg">Nouvelle recherche</a>
+    <a href="dashboard.html" class="btn btn-ghost btn-lg">Tableau de bord</a>
+  </div>
+</div>
+
+<!-- Toast container -->
+<div class="toast-container" id="toast-container"></div>
+
+<script type="module">
+  import { requireAuth, logout } from './js/auth.js';
+  import { loadFavorites, removeFavorite, buildFavMap } from './js/favorites.js';
+  import { fetchCoverUrl, buildAmazonUrl } from './js/results.js';
+
+  function showToast(msg, type = 'info') {
+    const tc = document.getElementById('toast-container');
+    const t = document.createElement('div');
+    t.className = `toast ${type}`;
+    t.textContent = msg;
+    tc.appendChild(t);
+    setTimeout(() => t.remove(), 4000);
+  }
+
+  function escHtml(str) {
+    return String(str)
+      .replace(/&/g, '&amp;').replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+  }
+
+  const user = await requireAuth();
+  if (!user) throw new Error('Non authentifié');
+  document.getElementById('btn-logout').addEventListener('click', logout);
+
+  let favorites = await loadFavorites(user.id);
+  document.getElementById('loader').classList.add('hidden');
+  document.getElementById('main-content').style.display = 'block';
+
+  const grid = document.getElementById('favs-grid');
+  const countEl = document.getElementById('favs-count');
+
+  function updateCount() {
+    countEl.textContent = favorites.length === 0
+      ? 'Aucun favori pour l'instant'
+      : `${favorites.length} livre${favorites.length > 1 ? 's' : ''} sauvegardé${favorites.length > 1 ? 's' : ''}`;
+  }
+
+  function showEmpty() {
+    grid.innerHTML = `
+      <div class="dashboard-empty" style="grid-column:1/-1">
+        <div class="icon">🤍</div>
+        <h3>Aucun favori pour l'instant</h3>
+        <p>Cliquez sur le cœur d'un livre pour le sauvegarder ici.</p>
+        <a href="questionnaire.html" class="btn btn-primary btn-lg">Trouver des livres</a>
+      </div>`;
+  }
+
+  async function renderFavorites() {
+    grid.innerHTML = '';
+    updateCount();
+    if (favorites.length === 0) { showEmpty(); return; }
+
+    const rotations = [-1.5, 2, -2.5, 1.5, -1, 2.5, -1.8, 1.2, -2, 1.8];
+
+    // Charger les pochettes en parallèle
+    const covers = await Promise.all(
+      favorites.map(f => fetchCoverUrl(f.book.title, f.book.author))
+    );
+
+    favorites.forEach((fav, i) => {
+      const book      = fav.book;
+      const coverUrl  = covers[i];
+      const rotation  = rotations[i % rotations.length];
+      const amazonUrl = buildAmazonUrl(book.amazon_search || `${book.title} ${book.author}`);
+
+      const coverHtml = coverUrl
+        ? `<img class="book-cover" src="${coverUrl}" alt="${escHtml(book.title)}" loading="lazy" />`
+        : `<div class="book-cover book-cover--placeholder">${escHtml(book.title[0] ?? '?')}</div>`;
+
+      const article = document.createElement('article');
+      article.className = 'book-card';
+      article.style.setProperty('--card-rotation', `${rotation}deg`);
+      article.innerHTML = `
+        <button class="book-heart active" data-fav-id="${fav.id}" title="Retirer des favoris">❤️</button>
+        <span class="book-sticker">${i + 1}</span>
+        <div class="book-card-inner">
+          <div class="book-cover-wrap">${coverHtml}</div>
+          <div class="book-content">
+            <div class="book-title">${escHtml(book.title)}</div>
+            <div class="book-author">${escHtml(book.author)}</div>
+            <div class="book-year">${escHtml(String(book.year ?? ''))}</div>
+            <div class="book-summary">${escHtml(book.summary ?? '')}</div>
+            <div class="book-card-footer">
+              <a href="${amazonUrl}" target="_blank" rel="noopener noreferrer" class="btn btn-primary btn-sm">
+                Voir sur Amazon.fr
+              </a>
+            </div>
+          </div>
+        </div>`;
+
+      // Retirer des favoris
+      article.querySelector('.book-heart').addEventListener('click', async (e) => {
+        e.stopPropagation();
+        const btn = e.currentTarget;
+        if (btn.classList.contains('loading')) return;
+        btn.classList.add('loading');
+        try {
+          await removeFavorite(fav.id);
+          favorites = favorites.filter(f => f.id !== fav.id);
+          article.style.transition = 'opacity .3s ease, transform .3s ease';
+          article.style.opacity = '0';
+          article.style.transform = `rotate(${rotation}deg) scale(0.88)`;
+          setTimeout(() => {
+            article.remove();
+            updateCount();
+            if (favorites.length === 0) showEmpty();
+          }, 300);
+        } catch {
+          showToast('Erreur, réessayez.', 'error');
+          btn.classList.remove('loading');
+        }
+      });
+
+      grid.appendChild(article);
+    });
+  }
+
+  await renderFavorites();
+</script>
+
+</body>
+</html>
