@@ -19,6 +19,12 @@
 <div class="loader-overlay hidden" id="loader">
   <div class="spinner"></div>
   <p>Nous choisissons vos livres…</p>
+  <div class="loader-progress-wrap">
+    <div class="loader-progress-bar">
+      <div class="loader-progress-fill" id="loader-progress-fill"></div>
+    </div>
+    <span class="loader-progress-pct" id="loader-progress-pct">0 %</span>
+  </div>
 </div>
 
 <div class="page-container questionnaire-page">
@@ -241,12 +247,28 @@
     loader.classList.remove('hidden');
     document.getElementById('btn-submit').disabled = true;
 
+    // Progression simulée : monte jusqu'à 90% pendant l'attente
+    let pct = 0;
+    const fillEl = document.getElementById('loader-progress-fill');
+    const pctEl  = document.getElementById('loader-progress-pct');
+    const progressInterval = setInterval(() => {
+      const remaining = 90 - pct;
+      pct += remaining * 0.06;
+      if (pct > 89) pct = 89;
+      fillEl.style.width = pct.toFixed(1) + '%';
+      pctEl.textContent  = Math.round(pct) + ' %';
+    }, 400);
+
     try {
       const result = await callRecommendFunction(questionnaire);
+      clearInterval(progressInterval);
+      fillEl.style.width = '100%';
+      pctEl.textContent  = '100 %';
       const books = result.books || result;
       const recId = await saveRecommendation(user.id, questionnaire, books);
       window.location.href = `results.html?id=${recId}`;
     } catch (err) {
+      clearInterval(progressInterval);
       loader.classList.add('hidden');
       document.getElementById('btn-submit').disabled = false;
       console.error(err);
