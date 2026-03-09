@@ -7,7 +7,7 @@ export async function fetchCoverUrl(title, author) {
   try {
     const q = encodeURIComponent(`intitle:${title} inauthor:${author}`);
     const res = await fetch(
-      `https://www.googleapis.com/books/v1/volumes?q=${q}&maxResults=1&fields=items(volumeInfo/imageLinks)`
+      `https://www.googleapis.com/books/v1/volumes?q=${q}&maxResults=1&fields=items(volumeInfo/imageLinks)&key=AIzaSyAFTv82krxv6PyX5QJqOfOlP0_UFcBJIXk`
     );
     if (!res.ok) return null;
     const data = await res.json();
