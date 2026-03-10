@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Fredericka+the+Great&family=Dancing+Script:wght@400;600;700&family=Nunito:wght@600;700;800;900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=Fredericka+the+Great&family=Dancing+Script:wght@400;600;700&family=Nunito:wght@600;700;800;900&display=swap');
 
 /* ── Variables ─────────────────────────────── */
 :root {
@@ -7,7 +7,7 @@
   --fuschia:      #F5247B;
   --periwinkle:   #CDD5F0;
   --lightning:    #D4E620;
-  --emerald:      #0EAA5F;
+  --emerald:      #C2185B;
   --cream:        #FDF8ED;
   --dark:         #1A1A2E;
   --paper-white:  #FFFDF7;
@@ -33,7 +33,12 @@ a { color: var(--cobalt); text-decoration: none; }
 a:hover { text-decoration: underline; }
 
 /* ── Typography ────────────────────────────── */
-h1, h2 {
+h1 {
+  font-family: 'EB Garamond', serif;
+  line-height: 1.2;
+  color: var(--dark);
+}
+h2 {
   font-family: 'Fredericka the Great', serif;
   line-height: 1.2;
   color: var(--dark);
@@ -60,8 +65,8 @@ h2 { font-size: clamp(1.5rem, 3.5vw, 2.2rem); }
   box-shadow: 0 3px 16px rgba(0,0,0,.3);
 }
 .navbar-brand {
-  font-family: 'Fredericka the Great', serif;
-  color: var(--lightning);
+  font-family: 'EB Garamond', serif;
+  color: var(--fuschia);
   font-size: 1.55rem;
   letter-spacing: .04em;
   text-decoration: none;
@@ -846,7 +851,7 @@ h2 { font-size: clamp(1.5rem, 3.5vw, 2.2rem); }
 .book-why {
   font-family: 'Dancing Script', cursive;
   font-size: 1.05rem; color: var(--emerald);
-  background: rgba(14, 170, 95, .08);
+  background: rgba(194, 24, 91, .08);
   padding: .6rem .9rem;
   border-left: 3px solid var(--emerald);
   border-radius: 0 8px 8px 0;
@@ -874,7 +879,9 @@ h2 { font-size: clamp(1.5rem, 3.5vw, 2.2rem); }
 
 /* ── Responsive ────────────────────────────── */
 @media (max-width: 640px) {
-  .navbar { padding: .8rem 1rem; }
+  .navbar { padding: .7rem 1rem; flex-wrap: wrap; }
+  .navbar-user { display: none; }
+  .navbar-right { width: 100%; justify-content: flex-end; gap: .5rem; }
   .auth-card { padding: 1.4rem 1rem; }
   .checkbox-grid { grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); }
   .book-card:nth-child(n) { align-self: stretch; margin: 0; }
