@@ -6,7 +6,7 @@
   --pepper:       #F47B3E;
   --fuschia:      #F5247B;
   --periwinkle:   #CDD5F0;
-  --lightning:    #D4E620;
+  --lightning:    #F472B6;
   --emerald:      #C2185B;
   --cream:        #FDF8ED;
   --dark:         #1A1A2E;
@@ -301,8 +301,8 @@ h2 { font-size: clamp(1.5rem, 3.5vw, 2.2rem); }
   top: -12px; left: 50%;
   transform: translateX(-50%) rotate(-1.5deg);
   width: 80px; height: 22px;
-  background: rgba(212, 230, 32, 0.5);
-  border: 1px solid rgba(180,200,20,.4);
+  background: rgba(244, 114, 182, 0.35);
+  border: 1px solid rgba(200, 80, 150, .3);
   border-radius: 2px;
 }
 
@@ -420,8 +420,8 @@ h2 { font-size: clamp(1.5rem, 3.5vw, 2.2rem); }
   top: -10px; left: 50%;
   transform: translateX(-50%) rotate(-1deg);
   width: 52px; height: 18px;
-  background: rgba(212, 230, 32, 0.5);
-  border: 1px solid rgba(180,200,20,.4);
+  background: rgba(244, 114, 182, 0.35);
+  border: 1px solid rgba(200, 80, 150, .3);
   border-radius: 2px;
 }
 .history-card:hover {
@@ -544,8 +544,8 @@ h2 { font-size: clamp(1.5rem, 3.5vw, 2.2rem); }
   content: '';
   position: absolute; top: -10px; left: 28px;
   width: 60px; height: 18px;
-  background: rgba(212, 230, 32, 0.5);
-  border: 1px solid rgba(180,200,20,.4);
+  background: rgba(244, 114, 182, 0.35);
+  border: 1px solid rgba(200, 80, 150, .3);
   border-radius: 2px;
   transform: rotate(1deg);
 }
@@ -738,8 +738,8 @@ h2 { font-size: clamp(1.5rem, 3.5vw, 2.2rem); }
   position: absolute; top: -11px; left: 50%;
   transform: translateX(-50%) rotate(-1.5deg);
   width: 70px; height: 22px;
-  background: rgba(212, 230, 32, 0.5);
-  border: 1px solid rgba(180,200,20,.4);
+  background: rgba(244, 114, 182, 0.35);
+  border: 1px solid rgba(200, 80, 150, .3);
   border-radius: 1px;
   transition: transform .32s ease, opacity .32s ease;
 }
